@@ -7,37 +7,42 @@ const express = require('express');
 const bodyparser = require('body-parser');
 const cors = require('cors')({origin: true});
 const app = express();
-const gcsw = require('@google-cloud/storage')();
+const gcs = require('@google-cloud/storage')();
 const spawn = require('child-process-promise').spawn;
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
 const Busboy = require('busboy');
 const fileUpload = require('express-fileupload');
-var gcloud = require('google-cloud');
+
 // Here is a tesat bucket: storage.danthegoodman.com
 
 
 app.use(bodyparser.json())
 app.use(fileUpload());
 
-app.get('/tcpdump', (req, res) => {
+app.post('/tcpdump', (req, res) => {
+  // res.send("This this is the tcp dump!");
+  // All the if statements to make sure we have everything:
+  // if(!req.body) return res.status(400).send("I need a body!") // If there is no body respond with error and tell them that we need a body
+  // if(!req.body.company) return res.status(400).send("Specify an organization please!");
+  // if(!req.body.cuid) return  res.status(400).send("I still need the CUID please!"); // Company unique id
+  // if(!req.body.deviceID) return res.status(400).send("You need to specify the device please!"); // The computer that is hitting it
+  // if(req.body.device)
 
-    // Enable Storage
-    var gcs = gcloud.storage({
-      projectId: 'prime-pod-200918',
-      keyFilename: './keyfile.json'
-    });
+  // let company = req.body.company;
+  // let cuid = req.body.cuid;
+  //let companyDbRef = admin.database().ref(`/${company}`);
+  // const ref = functions.storage.ref();
+  // const bucket = admin.storage().bucket();
+  var bucket = gcs.bucket('vip-ids.appspot.com');
+  // let deviceID = req.body.deviceID
+  if (!req.files){
+    return res.status(400).send('No files were uploaded.');
+  }
 
-    // Reference an existing bucket.
-    var bucket = gcs.bucket('storage.danthegoodman.com');
-
-    // Upload a local file to a new file to be created in your bucket.
-    bucket.upload('./testfile.txt', function(err, file) {
-      if (!err) {
-        res.send("done?");
-      }
-    });
+  bucket.upload(req.files.sampleFile);
+  res.send("File uploaded?");
 });
 exports.gettcpdata = functions.https.onRequest(app);
 
